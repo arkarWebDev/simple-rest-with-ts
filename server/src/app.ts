@@ -5,6 +5,7 @@ import todoRoutes from "./routes/todo";
 import userRoutes from "./routes/user";
 import cors from "cors";
 import errorHandler from "./middlewares/errorHandler";
+import cookieParser from "cookie-parser";
 
 dotenv.config({
   path: ".env",
@@ -18,6 +19,7 @@ app.use(
   })
 );
 app.use(json());
+app.use(cookieParser());
 
 app.use(userRoutes);
 app.use(todoRoutes);

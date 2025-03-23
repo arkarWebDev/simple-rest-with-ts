@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../models/user";
 import generateToken from "../utils/generateToken";
 import asyncHandler from "../utils/asyncHandler";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
@@ -59,3 +60,37 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({ message: "User logout." });
 });
+
+export const getUserProfile = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const user = {
+      _id: req.user?._id,
+      name: req.user?.name,
+      email: req.user?.email,
+    };
+    res.status(200).json(user);
+  }
+);
+
+export const updateUserProfile = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const user = await User.findById(req.user?._id);
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found.");
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.password = req.body.password || user.password;
+    const updatedUser = await user.save();
+
+    const selectedUser = {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    };
+    res.status(200).json(selectedUser);
+  }
+);
