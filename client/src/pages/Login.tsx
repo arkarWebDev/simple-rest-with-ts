@@ -3,20 +3,48 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../schema/login";
 
+import { useLoginMutation } from "../slices/userApi";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserInfo } from "../slices/auth";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { RootState } from "../store";
+
 type FormInputs = z.infer<typeof loginSchema>;
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormInputs>({
     resolver: zodResolver(loginSchema),
   });
 
-  const submit: SubmitHandler<FormInputs> = (data) => {
-    console.log(data);
+  const [login, { isLoading }] = useLoginMutation();
+  const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+
+  const submit: SubmitHandler<FormInputs> = async (data) => {
+    try {
+      const res = await login(data).unwrap();
+      dispatch(setUserInfo(res));
+      reset();
+      navigate("/");
+    } catch (err: any) {
+      toast.error(err?.data?.message || err.error);
+    }
   };
+
+  useEffect(() => {
+    if (userInfo) {
+      navigate("/");
+    }
+  }, [navigate, userInfo]);
 
   return (
     <div className="max-w-lg mx-auto mt-20">
@@ -50,7 +78,7 @@ const Login = () => {
         <button
           type="submit"
           className="text-white bg-black py-2 px-4 border"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoading}
         >
           Login
         </button>
