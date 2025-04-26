@@ -5,6 +5,10 @@ interface loginInput {
   password: string;
 }
 
+interface registerInput extends loginInput {
+  name: string;
+}
+
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -15,7 +19,23 @@ export const userApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "logout",
+        method: "DELETE",
+        credentials: "include",
+      }),
+    }),
+    register: builder.mutation({
+      query: (data: registerInput) => ({
+        url: "register",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = userApiSlice;
+export const { useLoginMutation, useLogoutMutation, useRegisterMutation } =
+  userApiSlice;

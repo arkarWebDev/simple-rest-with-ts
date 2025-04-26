@@ -2,6 +2,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import * as z from "zod";
 import { registerSchema } from "../schema/register";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRegisterMutation } from "../slices/userApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type FormInputs = z.infer<typeof registerSchema>;
 
@@ -10,12 +13,23 @@ const Register = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormInputs>({
     resolver: zodResolver(registerSchema),
   });
 
-  const submit: SubmitHandler<FormInputs> = (data) => {
-    console.log(data);
+  const [registerMutation, { isLoading }] = useRegisterMutation();
+  const navigate = useNavigate();
+
+  const submit: SubmitHandler<FormInputs> = async (data) => {
+    try {
+      await registerMutation(data);
+      reset();
+      toast.success("Register successful.");
+      navigate("/login");
+    } catch (err: any) {
+      toast.error(err?.data?.message || err.error);
+    }
   };
 
   return (
@@ -61,7 +75,7 @@ const Register = () => {
         <button
           type="submit"
           className="text-white bg-black py-2 px-4 border"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoading}
         >
           Register
         </button>

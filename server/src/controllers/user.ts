@@ -52,6 +52,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+// DELETE -> /logout
 export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("token", "", {
     httpOnly: true,

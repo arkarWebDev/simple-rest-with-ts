@@ -1,9 +1,24 @@
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import { RootState } from "../store";
+import { useLogoutMutation } from "../slices/userApi";
+import { clearUserInfo } from "../slices/auth";
 
 const Header = () => {
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+  const [logut, { isLoading }] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const logoutHandler = async () => {
+    try {
+      await logut({});
+      dispatch(clearUserInfo());
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <nav className="flex my-10 items-center justify-between">
@@ -15,6 +30,8 @@ const Header = () => {
           <button
             type="button"
             className="text-white bg-red-600 py-2 px-4 border border-red-600"
+            onClick={logoutHandler}
+            disabled={isLoading}
           >
             Logout
           </button>
