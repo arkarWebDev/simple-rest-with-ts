@@ -1,40 +1,47 @@
-import { SubmitHandler, useForm } from "react-hook-form";
-import * as z from "zod";
-import { registerSchema } from "../schema/register";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRegisterMutation } from "../slices/userApi";
-import { useNavigate } from "react-router-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { useUpdateProfileMutation } from "../slices/userApi";
 import { toast } from "react-toastify";
+import { setUserInfo } from "../slices/auth";
+import { updateProfileSchema } from "../schema/update";
 
-type FormInputs = z.infer<typeof registerSchema>;
+type FormInputs = z.infer<typeof updateProfileSchema>;
 
-const Register = () => {
+const Profile = () => {
+  const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<FormInputs>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      name: userInfo?.name,
+      email: userInfo?.email,
+      password: "",
+    },
   });
-
-  const [registerMutation, { isLoading }] = useRegisterMutation();
-  const navigate = useNavigate();
 
   const submit: SubmitHandler<FormInputs> = async (data) => {
     try {
-      await registerMutation(data).unwrap;
-      reset();
-      toast.success("Register successful.");
-      navigate("/login");
+      const res = await updateProfile(data);
+      console.log(res);
+      dispatch(setUserInfo(res.data));
+      toast.success("User profile updated.");
     } catch (err: any) {
       toast.error(err?.data?.message || err.error);
     }
   };
-
   return (
-    <div className="max-w-lg mx-auto mt-20">
-      <h2 className="text-3xl font-bold mb-2">Register</h2>
+    <main className="max-w-xl mx-auto">
+      <h2 className="text-3xl font-bold">Profile</h2>
       <form className="flex flex-col space-y-2" onSubmit={handleSubmit(submit)}>
         <div>
           <label htmlFor="name" className=" block mb-1 text-sm text-gray-500">
@@ -77,11 +84,11 @@ const Register = () => {
           className="text-white bg-black py-2 px-4 border"
           disabled={isSubmitting || isLoading}
         >
-          Register
+          Update profile
         </button>
       </form>
-    </div>
+    </main>
   );
 };
 
-export default Register;
+export default Profile;
