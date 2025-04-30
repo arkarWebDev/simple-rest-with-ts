@@ -34,7 +34,7 @@ export const getNotes = async (): Promise<Note[]> => {
 // };
 
 export const createNote = async (title: string) => {
-  await axios.post(`${API_URL}/create`, { title });
+  await axios.post(`${API_URL}/create`, { title }, { withCredentials: true });
 };
 
 // export const updateNote = async (id: string, title: string) => {
@@ -48,7 +48,11 @@ export const createNote = async (title: string) => {
 // };
 
 export const updateNote = async (id: string, title: string) => {
-  await axios.put(`${API_URL}/todos/${id}`, { title });
+  await axios.put(
+    `${API_URL}/todos/${id}`,
+    { title },
+    { withCredentials: true }
+  );
 };
 
 // export const deleteNote = async (id: string) => {
@@ -58,5 +62,5 @@ export const updateNote = async (id: string, title: string) => {
 // };
 
 export const deleteNote = async (id: string) => {
-  await axios.delete(`${API_URL}/todos/${id}`);
+  await axios.delete(`${API_URL}/todos/${id}`, { withCredentials: true });
 };

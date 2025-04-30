@@ -19,7 +19,6 @@ const Profile = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<FormInputs>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
